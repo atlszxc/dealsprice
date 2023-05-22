@@ -20,16 +20,21 @@ const startServer = async () => {
 		app.get("/ping", (_, res) => res.send("pong " + Date.now()));
 
 		app.post("/hook", async (req, res) => {
+			// console.log(req.body.task)
 			if(req.body.task) {
-				api.addNote(
-					{
-						entity_id: Number(req.body.task.update[0].element_id),
-						note_type: "common",
-						params: {
-							text: 'Бюджет проверен, ошибок нет'
+				console.log(req.body.task)
+				if(req.body.task.update[0].action_close === '1') {
+					api.addNote(
+						{
+							entity_id: Number(req.body.task.update[0].element_id),
+							note_type: "common",
+							params: {
+								text: 'Бюджет проверен, ошибок нет'
+							}
 						}
-					}
-				)
+					)
+				}
+			
 				return
 			}
 			const [deal] = req.body.leads.update ?? req.body.leads.add
