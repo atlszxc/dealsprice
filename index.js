@@ -20,13 +20,14 @@ const startServer = async () => {
 		app.get("/ping", (_, res) => res.send("pong " + Date.now()));
 
 		app.post("/hook", async (req, res) => {
-			const [deal] = req.body.leads.update
+			const [deal] = req.body.leads.update ?? req.body.leads.add
 			const customFields = getFieldValues(deal.custom_fields, SELECTED_MULTILIST_DEALS_ID)
 			if(!customFields) {
 				return logger.error('No selected services')
 			}
 
 			const { _embedded: { contacts } } = await api.getDeal(deal.id, ['contacts'])
+			console.log(contacts)
 			const contact = await api.getContact(contacts[0].id)
 	
 			if(!contact) {
@@ -35,7 +36,7 @@ const startServer = async () => {
 	
 			const price = getPrice(customFields, contact.custom_fields_values)
 	
-			await api.updateDeals({
+			const updatedDeals = await api.updateDeals({
 				id: Number(deal.id),
 				price: price
 			})

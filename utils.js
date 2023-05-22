@@ -9,18 +9,18 @@ const logger = require("./logger");
 
 
 /**
- * Функция извлекает значение из id поля, массива полей custom_fields сущности amoCRM
+ * Функция считает бюджет сделки
  * 
  * @param {*} selectedDeal - массив указанных в сделке услуг;
  * @param {*} contactCustomFields - массив кастомных полей прикрепленного к сделке контакта;
  * @returns бюджет услуги
  */
-const getPrice = (selectedDeal, contactCustomFields) => {
+const getPrice = (selectedServices, contactCustomFields) => {
 	let sum = 0
-	for (const value of contactCustomFields) {
-		const flag = selectedDeal.find(item => item === value.field_name)
+	for (const field of contactCustomFields) {
+		const flag = selectedServices.find(selectedService => selectedService === field.field_name)
 		if(flag) {
-			sum += Number(value.values[0].value)
+			sum += Number(field.values[0].value)
 		}
 	}
 
