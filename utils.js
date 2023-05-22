@@ -11,16 +11,16 @@ const logger = require("./logger");
 /**
  * Функция считает бюджет сделки
  * 
- * @param {*} selectedDeal - массив указанных в сделке услуг;
+ * @param {*} selectedMultilistDeals - массив указанных в сделке услуг;
  * @param {*} contactCustomFields - массив кастомных полей прикрепленного к сделке контакта;
  * @returns бюджет услуги
  */
-const getPrice = (selectedServices, contactCustomFields) => {
+const getPrice = (selectedMultilistDeals, contactCustomFields) => {
 	let sum = 0
-	for (const field of contactCustomFields) {
-		const flag = selectedServices.find(selectedService => selectedService === field.field_name)
+	for (const contactCustonField of contactCustomFields) {
+		const flag = selectedMultilistDeals.find(selectedService => selectedService === contactCustonField.field_name)
 		if(flag) {
-			sum += Number(field.values[0].value)
+			sum += Number(contactCustonField.values[0].value)
 		}
 	}
 
