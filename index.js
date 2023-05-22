@@ -20,9 +20,7 @@ const startServer = async () => {
 		app.get("/ping", (_, res) => res.send("pong " + Date.now()));
 
 		app.post("/hook", async (req, res) => {
-			// console.log(req.body.task)
 			if(req.body.task) {
-				console.log(req.body.task)
 				if(req.body.task.update[0].action_close === '1') {
 					api.addNote(
 						{
