@@ -7,7 +7,7 @@ const api = require("./api");
 const logger = require("./logger");
 const config = require("./config");
 const { getFieldValues, getPrice } = require("./utils");
-const { SELECTED_MULTILIST_DEALS_ID } = require("./const");
+const { SELECTED_MULTILIST_DEALS_ID, TASK_TYPE_ID, DATE_TO_DEADLINE } = require("./const");
 
 const app = express();
 
@@ -20,28 +20,39 @@ const startServer = async () => {
 		app.get("/ping", (_, res) => res.send("pong " + Date.now()));
 
 		app.post("/hook", async (req, res) => {
+			console.log(1)
 			const [deal] = req.body.leads.update ?? req.body.leads.add
 			const customFields = getFieldValues(deal.custom_fields, SELECTED_MULTILIST_DEALS_ID)
 			if(!customFields) {
 				return logger.error('No selected services')
 			}
 
-			const { _embedded: { contacts } } = await api.getDeal(deal.id, ['contacts'])
-			console.log(contacts)
-			const contact = await api.getContact(contacts[0].id)
-	
-			if(!contact) {
-				return logger.error('No contact in deal')
+			const dealData = await api.getDeal(deal.id, ['contacts'])
+			if(!dealData._embedded) {
+				return logger.error('No contacts in deal')
 			}
+			const contact = await api.getContact(dealData._embedded.contacts[0].id)
 	
 			const price = getPrice(customFields, contact.custom_fields_values)
+
+			if(price !== Number(deal.price)) {
+				await api.updateDeals({
+					id: Number(deal.id),
+					price: price
+				})
 	
-			const updatedDeals = await api.updateDeals({
-				id: Number(deal.id),
-				price: price
-			})
-	
-			res.send("OK");
+				if(!dealData.closest_task_at) {
+					await api.createTasks({
+						task_type_id: TASK_TYPE_ID,
+						text: 'Проверить бюджет',
+						entity_id: Number(deal.id),
+						entity_type: 'leads',
+						complete_till: DATE_TO_DEADLINE
+					})
+				}
+		
+				res.send("OK");
+			}
 		});
 
 		app.listen(config.PORT, () => logger.debug("Server started on ", config.PORT));
