@@ -232,6 +232,16 @@ function Api() {
 			.then((res) => res.data);
 	});
 
+	this.addNote = authChecker(data => {
+		return axios.post(
+			`${ROOT_PATH}/api/v4/leads/${data.entity_id}/notes`, [].concat(data), 
+			{
+				headers: {
+					Authorization: `Bearer ${access_token}`,
+			},
+		}).then(res => res.data)
+	})
+
 	// Получить данные по статусу воронки по id воронки и id статуса
 	this.getStatus = authChecker(({ pipelineId, statusId }) => {
 		return axios
