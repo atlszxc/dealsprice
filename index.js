@@ -22,6 +22,10 @@ const startServer = async () => {
 		app.post("/hook", async (req, res) => {
 			const [deal] = req.body.leads.update
 			const customFields = getFieldValues(deal.custom_fields, SELECTED_MULTILIST_DEALS_ID)
+			if(!customFields) {
+				return logger.error('No selected services')
+			}
+
 			const { _embedded: { contacts } } = await api.getDeal(deal.id, ['contacts'])
 			const contact = await api.getContact(contacts[0].id)
 	
